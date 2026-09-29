@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>mil ↔ mm Converter</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      min-height: 100vh;
+      background: linear-gradient(135deg, #0a1628 0%, #0c1a30 60%, #081420 100%);
+      font-family: 'Segoe UI', system-ui, sans-serif;
+      color: #d0e8ff;
+      padding: 40px 0 0 48px;
+    }
+
+    .card {
+      display: inline-block;
+      background: linear-gradient(160deg, #0f1e38 0%, #0c1c30 100%);
+      border: 1px solid #1e4070;
+      border-radius: 16px;
+      padding: 32px 36px 28px;
+      box-shadow: 0 6px 32px rgba(0,0,0,0.5), inset 0 1px 0 rgba(80,160,255,0.08);
+    }
+
+    h1 {
+      font-size: 16px;
+      font-weight: 700;
+      letter-spacing: 0.10em;
+      color: #60c0ff;
+      margin-bottom: 4px;
+      text-transform: uppercase;
+    }
+
+    .subtitle {
+      font-size: 12px;
+      color: #4878a0;
+      letter-spacing: 0.04em;
+      margin-bottom: 26px;
+    }
+
+    .row {
+      display: flex;
+      align-items: stretch;
+      margin-bottom: 18px;
+      border-radius: 12px;
+      overflow: hidden;
+      border: 2px solid #1e4070;
+      transition: border-color 0.2s, box-shadow 0.2s;
+    }
+    .row:focus-within {
+      border-color: #4098e8;
+      box-shadow: 0 0 0 3px rgba(64,152,232,0.22);
+    }
+
+    input[type="number"] {
+      width: 220px;
+      font-size: 24px;
+      font-weight: 500;
+      color: #e0f0ff;
+      background: #08111e;
+      border: none;
+      padding: 14px 16px;
+      outline: none;
+      -moz-appearance: textfield;
+    }
+    input[type="number"]::-webkit-inner-spin-button,
+    input[type="number"]::-webkit-outer-spin-button { -webkit-appearance: none; }
+    input[type="number"]::placeholder { color: #1e3a58; }
+
+    .unit {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 72px;
+      font-size: 24px;
+      font-weight: 700;
+      background: #0f1e38;
+      color: #60c0ff;
+      border-left: 2px solid #1e4070;
+      letter-spacing: 0.02em;
+      flex-shrink: 0;
+    }
+
+    .divider {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin: 6px 0 20px;
+    }
+    .divider::before, .divider::after {
+      content: '';
+      flex: 1;
+      height: 1px;
+      background: linear-gradient(90deg, transparent, #2a5080, transparent);
+    }
+    .divider span { font-size: 16px; color: #3870b0; }
+
+    .toast {
+      position: fixed;
+      top: 24px;
+      left: 48px;
+      background: linear-gradient(90deg, #2070c0, #3098d8);
+      color: #fff;
+      padding: 9px 20px;
+      border-radius: 50px;
+      font-size: 13px;
+      font-weight: 500;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.22s, transform 0.22s;
+      transform: translateY(-8px);
+    }
+    .toast.show {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  </style>
+</head>
+<body>
+
+<div class="card">
+  <h1>mil ↔ mm Converter</h1>
+  <p class="subtitle">Result is automatically copied to clipboard</p>
+
+  <div class="row" id="row-mil">
+    <input id="mil" type="number" placeholder="0" step="any">
+    <span class="unit">mil</span>
+  </div>
+
+  <div class="divider"><span>⇅</span></div>
+
+  <div class="row" id="row-mm">
+    <input id="mm" type="number" placeholder="0" step="any">
+    <span class="unit">mm</span>
+  </div>
+</div>
+
+<div class="toast" id="toast">Copied to clipboard</div>
+
+<script>
+  const milInput = document.getElementById('mil');
+  const mmInput  = document.getElementById('mm');
+  const toast    = document.getElementById('toast');
+
+  const MIL_PER_MM = 39.3700787402;
+
+  function round2(v) {
+    return Math.round(v * 100) / 100;
+  }
+
+  function copyToClipboard(text) {
+    navigator.clipboard.writeText(String(text)).catch(() => {
+      const ta = document.createElement('textarea');
+      ta.value = text;
+      document.body.appendChild(ta);
+      ta.select();
+      document.execCommand('copy');
+      ta.remove();
+    });
+    showToast();
+  }
+
+  let toastTimer;
+  function showToast() {
+    toast.classList.add('show');
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(() => toast.classList.remove('show'), 1800);
+  }
+
+  milInput.addEventListener('input', () => {
+    const val = milInput.value;
+    if (val === '') { mmInput.value = ''; return; }
+    const result = round2(parseFloat(val) / MIL_PER_MM);
+    mmInput.value = result;
+    copyToClipboard(result);
+  });
+
+  mmInput.addEventListener('input', () => {
+    const val = mmInput.value;
+    if (val === '') { milInput.value = ''; return; }
+    const result = round2(parseFloat(val) * MIL_PER_MM);
+    milInput.value = result;
+    copyToClipboard(result);
+  });
+</script>
+
+</body>
+</html>
